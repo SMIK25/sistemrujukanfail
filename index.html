@@ -92,6 +92,10 @@
                     <thead class="bg-gray-50">
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reference Number</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Division</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">File Code</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sub-File</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Series</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">File Name</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Document Title</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
@@ -126,25 +130,58 @@
                 </button>
             </div>
             <form id="newDocumentForm" class="p-6 space-y-6">
+                <!-- File Classification Section -->
+                <div class="bg-gray-50 rounded-lg p-4 mb-6">
+                    <h3 class="text-md font-semibold text-gray-900 mb-4">File Classification</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Division Code *</label>
+                            <select id="divisionCode" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="">Select Division</option>
+                                <option value="700">700 - Kokurikulum</option>
+                                <option value="600">600 - Akademik</option>
+                                <option value="500">500 - Pentadbiran</option>
+                                <option value="400">400 - Kewangan</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">File Code *</label>
+                            <select id="fileCode" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="">Select File Code</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Sub-File Code *</label>
+                            <select id="subFileCode" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="">Select Sub-File Code</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">File Series *</label>
+                            <select id="fileSeries" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="">Select File Series</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">File Name *</label>
-                        <select id="fileName" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                            <option value="">Select file category</option>
-                            <option value="SMIK.700-1/1/1">1. Jawatankuasa Kokurikulum</option>
-                            <option value="SMIK.700-1/1/2">2. Visi, Misi & Logo</option>
-                            <option value="SMIK.700-1/1/3">3. Perancangan / Takwim Tahunan Kokurikulum</option>
-                            <option value="SMIK.700-1/1/4">4. Kewangan & Perbelanjaan Kokurikulum</option>
-                            <option value="SMIK.700-1/1/5">5. Pekeliling / Surat Menyurat</option>
-                            <option value="SMIK.700-1/2/1">6. Mesyuarat Jawatankuasa Kokurikulum</option>
-                        </select>
-                        <p class="mt-1 text-xs text-gray-500">Select the file category for automatic reference generation</p>
+                        <input type="text" id="fileName" readonly class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-600">
+                        <p class="mt-1 text-xs text-gray-500">Auto-populated based on file series selection</p>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Next Reference Number</label>
-                        <input type="text" id="nextRefNumber" readonly class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-600">
-                        <p class="mt-1 text-xs text-gray-500">Auto-generated based on last entry</p>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Complete File Reference</label>
+                        <input type="text" id="completeFileRef" readonly class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-600">
+                        <p class="mt-1 text-xs text-gray-500">Complete file reference code</p>
                     </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Next Reference Number</label>
+                    <input type="text" id="nextRefNumber" readonly class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-800 font-medium">
+                    <p class="mt-1 text-xs text-gray-500">Auto-generated based on file classification and last entry</p>
                 </div>
                 
                 <div>
@@ -211,7 +248,7 @@
     <script>
         // Google Apps Script Configuration
         // Connected to your Google Apps Script deployment
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxPvr5xhZHmeixZuvTIX85c1urt1OvwTTyqVEDu-UQIiqY7BfWPRWMtzCH44JsKq-Y/exec';
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyGBaKZ1QCjsaZRY6NVNDLr1aJbbkNOUarTTWkRfiup8KgqKAQnyqeBbUev-HNxqPsD/exec';
         
         // Google Sheet ID extracted from your URL
         const GOOGLE_SHEET_ID = '1hMp-bUXcZ8ZduJVW1haWfm_dEZ22dIr_c0jLHr_NlGM';
@@ -220,6 +257,101 @@
         let documentsData = [];
         let filteredData = [];
         let isLoading = false;
+
+        // File Classification Structure
+        const fileClassification = {
+            '700': {
+                name: '700 - Kokurikulum',
+                fileCodes: {
+                    '700-1': {
+                        name: '700-1 Pengurusan Kokurikulum',
+                        subFiles: {
+                            '700-1/1': {
+                                name: '700-1/1 Pengurusan Am',
+                                series: {
+                                    '700-1/1/1': 'Jawatankuasa Kokurikulum',
+                                    '700-1/1/2': 'Visi, Misi & Logo',
+                                    '700-1/1/3': 'Perancangan / Takwim Tahunan Kokurikulum',
+                                    '700-1/1/4': 'Kewangan & Perbelanjaan Kokurikulum',
+                                    '700-1/1/5': 'Pekeliling / Surat Menyurat'
+                                }
+                            },
+                            '700-1/2': {
+                                name: '700-1/2 Aktiviti & Program',
+                                series: {
+                                    '700-1/2/1': 'Program Tahunan',
+                                    '700-1/2/2': 'Aktiviti Mingguan',
+                                    '700-1/2/3': 'Pertandingan & Kejohanan'
+                                }
+                            }
+                        }
+                    },
+                    '700-2': {
+                        name: '700-2 Sukan & Permainan',
+                        subFiles: {
+                            '700-2/1': {
+                                name: '700-2/1 Pengurusan Sukan',
+                                series: {
+                                    '700-2/1/1': 'Jawatankuasa Sukan',
+                                    '700-2/1/2': 'Kemudahan & Peralatan'
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            '600': {
+                name: '600 - Akademik',
+                fileCodes: {
+                    '600-1': {
+                        name: '600-1 Pengurusan Akademik',
+                        subFiles: {
+                            '600-1/1': {
+                                name: '600-1/1 Kurikulum',
+                                series: {
+                                    '600-1/1/1': 'Sukatan Pelajaran',
+                                    '600-1/1/2': 'Jadual Waktu'
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            '500': {
+                name: '500 - Pentadbiran',
+                fileCodes: {
+                    '500-1': {
+                        name: '500-1 Pengurusan Am',
+                        subFiles: {
+                            '500-1/1': {
+                                name: '500-1/1 Pentadbiran',
+                                series: {
+                                    '500-1/1/1': 'Mesyuarat & Minit',
+                                    '500-1/1/2': 'Surat Menyurat'
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            '400': {
+                name: '400 - Kewangan',
+                fileCodes: {
+                    '400-1': {
+                        name: '400-1 Pengurusan Kewangan',
+                        subFiles: {
+                            '400-1/1': {
+                                name: '400-1/1 Belanjawan',
+                                series: {
+                                    '400-1/1/1': 'Belanjawan Tahunan',
+                                    '400-1/1/2': 'Perbelanjaan Bulanan'
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        };
 
         // Google Sheets Integration Functions
         async function loadDataFromGoogleSheets() {
@@ -261,13 +393,34 @@
             
             showLoading(true);
             try {
+                // Prepare data in the correct order for spreadsheet columns
+                const spreadsheetData = {
+                    action: 'addDocument',
+                    data: {
+                        refNumber: documentData.refNumber,
+                        divisionCode: documentData.divisionCode,
+                        divisionName: documentData.divisionName,
+                        fileCode: documentData.fileCode,
+                        fileCodeName: documentData.fileCodeName,
+                        subFileCode: documentData.subFileCode,
+                        subFileCodeName: documentData.subFileCodeName,
+                        fileSeries: documentData.fileSeries,
+                        fileName: documentData.fileName,
+                        completeFileRef: documentData.completeFileRef,
+                        title: documentData.title,
+                        date: documentData.date,
+                        personInCharge: documentData.personInCharge,
+                        notes: documentData.notes
+                    }
+                };
+                
                 const response = await fetch(APPS_SCRIPT_URL, {
                     method: 'POST',
                     mode: 'no-cors',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(documentData)
+                    body: JSON.stringify(spreadsheetData)
                 });
                 
                 // With no-cors mode, we can't read the response
@@ -282,6 +435,66 @@
             } finally {
                 showLoading(false);
             }
+        }
+
+        function loadSampleData() {
+            documentsData = [
+                {
+                    id: 1,
+                    refNumber: 'SMIK.700-1/1/1JLD25(1)',
+                    divisionCode: '700',
+                    divisionName: '700 - Kokurikulum',
+                    fileCode: '700-1',
+                    fileCodeName: '700-1 Pengurusan Kokurikulum',
+                    subFileCode: '700-1/1',
+                    subFileCodeName: '700-1/1 Pengurusan Am',
+                    fileSeries: '700-1/1/1',
+                    fileName: 'Jawatankuasa Kokurikulum',
+                    completeFileRef: 'SMIK.700-1/1/1',
+                    title: 'Penubuhan Jawatankuasa Kokurikulum 2025',
+                    date: '2025-01-15',
+                    personInCharge: 'Pn. Siti Aminah',
+                    notes: 'Surat pelantikan ahli jawatankuasa kokurikulum'
+                },
+                {
+                    id: 2,
+                    refNumber: 'SMIK.700-1/1/2JLD25(1)',
+                    divisionCode: '700',
+                    divisionName: '700 - Kokurikulum',
+                    fileCode: '700-1',
+                    fileCodeName: '700-1 Pengurusan Kokurikulum',
+                    subFileCode: '700-1/1',
+                    subFileCodeName: '700-1/1 Pengurusan Am',
+                    fileSeries: '700-1/1/2',
+                    fileName: 'Visi, Misi & Logo',
+                    completeFileRef: 'SMIK.700-1/1/2',
+                    title: 'Kemaskini Visi dan Misi Sekolah',
+                    date: '2025-01-20',
+                    personInCharge: 'En. Ahmad Rahman',
+                    notes: 'Dokumen rasmi visi, misi dan logo sekolah'
+                },
+                {
+                    id: 3,
+                    refNumber: 'SMIK.700-1/1/3JLD25(1)',
+                    divisionCode: '700',
+                    divisionName: '700 - Kokurikulum',
+                    fileCode: '700-1',
+                    fileCodeName: '700-1 Pengurusan Kokurikulum',
+                    subFileCode: '700-1/1',
+                    subFileCodeName: '700-1/1 Pengurusan Am',
+                    fileSeries: '700-1/1/3',
+                    fileName: 'Perancangan / Takwim Tahunan Kokurikulum',
+                    completeFileRef: 'SMIK.700-1/1/3',
+                    title: 'Takwim Aktiviti Kokurikulum 2025',
+                    date: '2025-02-01',
+                    personInCharge: 'Cik Fatimah',
+                    notes: 'Perancangan aktiviti kokurikulum sepanjang tahun'
+                }
+            ];
+            filteredData = [...documentsData];
+            renderDocuments();
+            updateFilters();
+            updateTotalCount();
         }
 
         function showLoading(show) {
@@ -312,7 +525,12 @@
             document.getElementById('searchInput').addEventListener('input', applyFilters);
             document.getElementById('fileFilter').addEventListener('change', applyFilters);
             document.getElementById('yearFilter').addEventListener('change', applyFilters);
-            document.getElementById('fileName').addEventListener('change', updateNextRefNumber);
+            
+            // Add event listeners for cascade dropdowns
+            document.getElementById('divisionCode').addEventListener('change', updateFileCodeOptions);
+            document.getElementById('fileCode').addEventListener('change', updateSubFileCodeOptions);
+            document.getElementById('subFileCode').addEventListener('change', updateFileSeriesOptions);
+            document.getElementById('fileSeries').addEventListener('change', updateFileNameAndReference);
             document.getElementById('documentDate').addEventListener('change', updateNextRefNumber);
             
             // Load data from Google Sheets
@@ -338,7 +556,22 @@
                         <div class="text-sm font-medium text-gray-900">${doc.refNumber}</div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm text-gray-900">${doc.fileName}</div>
+                        <div class="text-xs text-gray-600">${doc.divisionCode || '-'}</div>
+                        <div class="text-sm text-gray-900">${doc.divisionName || '-'}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-xs text-gray-600">${doc.fileCode || '-'}</div>
+                        <div class="text-sm text-gray-900">${doc.fileCodeName || '-'}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-xs text-gray-600">${doc.subFileCode || '-'}</div>
+                        <div class="text-sm text-gray-900">${doc.subFileCodeName || '-'}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium text-indigo-600">${doc.fileSeries || '-'}</div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="text-sm text-gray-900">${doc.fileName || '-'}</div>
                     </td>
                     <td class="px-6 py-4">
                         <div class="text-sm text-gray-900">${doc.title}</div>
@@ -403,9 +636,102 @@
             renderDocuments();
         }
 
+        // Cascade dropdown functions
+        function updateFileCodeOptions() {
+            const divisionCode = document.getElementById('divisionCode').value;
+            const fileCodeSelect = document.getElementById('fileCode');
+            const subFileCodeSelect = document.getElementById('subFileCode');
+            const fileSeriesSelect = document.getElementById('fileSeries');
+            
+            // Clear dependent dropdowns
+            fileCodeSelect.innerHTML = '<option value="">Select File Code</option>';
+            subFileCodeSelect.innerHTML = '<option value="">Select Sub-File Code</option>';
+            fileSeriesSelect.innerHTML = '<option value="">Select File Series</option>';
+            document.getElementById('fileName').value = '';
+            document.getElementById('completeFileRef').value = '';
+            document.getElementById('nextRefNumber').value = '';
+            
+            if (divisionCode && fileClassification[divisionCode]) {
+                const fileCodes = fileClassification[divisionCode].fileCodes;
+                Object.keys(fileCodes).forEach(code => {
+                    const option = document.createElement('option');
+                    option.value = code;
+                    option.textContent = fileCodes[code].name;
+                    fileCodeSelect.appendChild(option);
+                });
+            }
+        }
+
+        function updateSubFileCodeOptions() {
+            const divisionCode = document.getElementById('divisionCode').value;
+            const fileCode = document.getElementById('fileCode').value;
+            const subFileCodeSelect = document.getElementById('subFileCode');
+            const fileSeriesSelect = document.getElementById('fileSeries');
+            
+            // Clear dependent dropdowns
+            subFileCodeSelect.innerHTML = '<option value="">Select Sub-File Code</option>';
+            fileSeriesSelect.innerHTML = '<option value="">Select File Series</option>';
+            document.getElementById('fileName').value = '';
+            document.getElementById('completeFileRef').value = '';
+            document.getElementById('nextRefNumber').value = '';
+            
+            if (divisionCode && fileCode && fileClassification[divisionCode]?.fileCodes[fileCode]) {
+                const subFiles = fileClassification[divisionCode].fileCodes[fileCode].subFiles;
+                Object.keys(subFiles).forEach(code => {
+                    const option = document.createElement('option');
+                    option.value = code;
+                    option.textContent = subFiles[code].name;
+                    subFileCodeSelect.appendChild(option);
+                });
+            }
+        }
+
+        function updateFileSeriesOptions() {
+            const divisionCode = document.getElementById('divisionCode').value;
+            const fileCode = document.getElementById('fileCode').value;
+            const subFileCode = document.getElementById('subFileCode').value;
+            const fileSeriesSelect = document.getElementById('fileSeries');
+            
+            // Clear dependent dropdowns
+            fileSeriesSelect.innerHTML = '<option value="">Select File Series</option>';
+            document.getElementById('fileName').value = '';
+            document.getElementById('completeFileRef').value = '';
+            document.getElementById('nextRefNumber').value = '';
+            
+            if (divisionCode && fileCode && subFileCode && 
+                fileClassification[divisionCode]?.fileCodes[fileCode]?.subFiles[subFileCode]) {
+                const series = fileClassification[divisionCode].fileCodes[fileCode].subFiles[subFileCode].series;
+                Object.keys(series).forEach(code => {
+                    const option = document.createElement('option');
+                    option.value = code;
+                    option.textContent = `${code} - ${series[code]}`;
+                    fileSeriesSelect.appendChild(option);
+                });
+            }
+        }
+
+        function updateFileNameAndReference() {
+            const divisionCode = document.getElementById('divisionCode').value;
+            const fileCode = document.getElementById('fileCode').value;
+            const subFileCode = document.getElementById('subFileCode').value;
+            const fileSeries = document.getElementById('fileSeries').value;
+            
+            if (divisionCode && fileCode && subFileCode && fileSeries && 
+                fileClassification[divisionCode]?.fileCodes[fileCode]?.subFiles[subFileCode]?.series[fileSeries]) {
+                
+                const fileName = fileClassification[divisionCode].fileCodes[fileCode].subFiles[subFileCode].series[fileSeries];
+                const completeFileRef = `SMIK.${fileSeries}`;
+                
+                document.getElementById('fileName').value = fileName;
+                document.getElementById('completeFileRef').value = completeFileRef;
+                
+                updateNextRefNumber();
+            }
+        }
+
         // Generate next reference number
-        function generateNextRefNumber(fileName, documentDate = null) {
-            if (!fileName) return '';
+        function generateNextRefNumber(completeFileRef, documentDate = null) {
+            if (!completeFileRef) return '';
             
             // Get year from document date, or current year if no date provided
             let year;
@@ -420,9 +746,9 @@
             const yearSuffix = `JLD${year.toString().slice(-2)}`;
             
             // Create the base reference with year
-            const baseRef = `${fileName}${yearSuffix}`;
+            const baseRef = `${completeFileRef}${yearSuffix}`;
             
-            // Find all documents with the same base file name and year
+            // Find all documents with the same base file reference and year
             const sameFileDocuments = documentsData.filter(doc => 
                 doc.refNumber && doc.refNumber.startsWith(baseRef)
             );
@@ -441,10 +767,10 @@
             return `${baseRef}(${nextSequence})`;
         }
 
-        // Update next reference number when file name or date changes
+        // Update next reference number when file reference or date changes
         function updateNextRefNumber() {
-            const fileName = document.getElementById('fileName').value.trim();
-            const nextRefNumber = generateNextRefNumber(fileName);
+            const completeFileRef = document.getElementById('completeFileRef').value.trim();
+            const nextRefNumber = generateNextRefNumber(completeFileRef);
             document.getElementById('nextRefNumber').value = nextRefNumber;
         }
 
@@ -458,6 +784,13 @@
         function closeNewDocumentForm() {
             document.getElementById('newDocumentModal').classList.add('hidden');
             document.getElementById('newDocumentForm').reset();
+            
+            // Clear all dependent dropdowns
+            document.getElementById('fileCode').innerHTML = '<option value="">Select File Code</option>';
+            document.getElementById('subFileCode').innerHTML = '<option value="">Select Sub-File Code</option>';
+            document.getElementById('fileSeries').innerHTML = '<option value="">Select File Series</option>';
+            document.getElementById('fileName').value = '';
+            document.getElementById('completeFileRef').value = '';
             document.getElementById('nextRefNumber').value = '';
         }
 
@@ -465,10 +798,23 @@
         document.getElementById('newDocumentForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
+            const divisionCode = document.getElementById('divisionCode').value;
+            const fileCode = document.getElementById('fileCode').value;
+            const subFileCode = document.getElementById('subFileCode').value;
+            const fileSeries = document.getElementById('fileSeries').value;
+            
             const formData = {
                 id: documentsData.length + 1,
                 refNumber: document.getElementById('nextRefNumber').value,
+                divisionCode: divisionCode,
+                divisionName: fileClassification[divisionCode]?.name || '',
+                fileCode: fileCode,
+                fileCodeName: fileClassification[divisionCode]?.fileCodes[fileCode]?.name || '',
+                subFileCode: subFileCode,
+                subFileCodeName: fileClassification[divisionCode]?.fileCodes[fileCode]?.subFiles[subFileCode]?.name || '',
+                fileSeries: fileSeries,
                 fileName: document.getElementById('fileName').value.trim(),
+                completeFileRef: document.getElementById('completeFileRef').value.trim(),
                 title: document.getElementById('documentTitle').value.trim(),
                 date: document.getElementById('documentDate').value,
                 personInCharge: document.getElementById('personInCharge').value.trim(),
@@ -524,5 +870,5 @@
         // Initialize the app when page loads
         document.addEventListener('DOMContentLoaded', initializeApp);
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9859062eb21dd04c',t:'MTc1ODk1NTM3OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9859458ae346abd7',t:'MTc1ODk1Nzk3NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
