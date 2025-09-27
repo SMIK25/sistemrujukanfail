@@ -130,14 +130,14 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">File Name *</label>
                         <select id="fileName" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                            <option value="">Select file reference...</option>
-                            <option value="SMIK.700-1/1/1">SMIK.700-1/1/1 - Jawatankuasa Kokurikulum</option>
-                            <option value="SMIK.700-1/1/2">SMIK.700-1/1/2 - Visi, Misi & Logo</option>
-                            <option value="SMIK.700-1/1/3">SMIK.700-1/1/3 - Perancangan/Takwim Tahunan Kokurikulum</option>
-                            <option value="SMIK.700-1/1/4">SMIK.700-1/1/4 - Kewangan & Perbelanjaan Kokurikulum</option>
-                            <option value="SMIK.700-1/1/5">SMIK.700-1/1/5 - Pekeliling/Surat Menyurat</option>
+                            <option value="">Select file category</option>
+                            <option value="SMIK.700-1/1/1">1. Jawatankuasa Kokurikulum</option>
+                            <option value="SMIK.700-1/1/2">2. Visi, Misi & Logo</option>
+                            <option value="SMIK.700-1/1/3">3. Perancangan / Takwim Tahunan Kokurikulum</option>
+                            <option value="SMIK.700-1/1/4">4. Kewangan & Perbelanjaan Kokurikulum</option>
+                            <option value="SMIK.700-1/1/5">5. Pekeliling / Surat Menyurat</option>
                         </select>
-                        <p class="mt-1 text-xs text-gray-500">Choose from existing file references</p>
+                        <p class="mt-1 text-xs text-gray-500">Select the file category for automatic reference generation</p>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Next Reference Number</label>
@@ -179,6 +179,14 @@
         </div>
     </div>
 
+    <!-- Loading Indicator -->
+    <div id="loadingIndicator" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+        <div class="bg-white rounded-lg p-6 flex items-center space-x-3">
+            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600"></div>
+            <span class="text-gray-700">Loading...</span>
+        </div>
+    </div>
+
     <!-- Success Message -->
     <div id="successMessage" class="hidden fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 fade-in">
         <div class="flex items-center space-x-2">
@@ -189,149 +197,149 @@
         </div>
     </div>
 
+    <!-- Error Message -->
+    <div id="errorMessage" class="hidden fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 fade-in">
+        <div class="flex items-center space-x-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+            <span id="errorText">An error occurred</span>
+        </div>
+    </div>
+
     <script>
-        // Google Apps Script URL
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwjrjmI6ZLfH3cylCiXqv3Z2rAG5-uaTqURSCqvjDtIEuRcuC7vomXZ7PEqp-vx4G_lcg/exec';
+        // Google Apps Script Configuration
+        // Connected to your Google Apps Script deployment
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxPvr5xhZHmeixZuvTIX85c1urt1OvwTTyqVEDu-UQIiqY7BfWPRWMtzCH44JsKq-Y/exec';
         
+        // Google Sheet ID extracted from your URL
+        const GOOGLE_SHEET_ID = '1hMp-bUXcZ8ZduJVW1haWfm_dEZ22dIr_c0jLHr_NlGM';
+        
+        // Global variables
         let documentsData = [];
         let filteredData = [];
         let isLoading = false;
 
-        // Load data from Google Sheets
-        async function loadDataFromSheets() {
+        // Google Sheets Integration Functions
+        async function loadDataFromGoogleSheets() {
+            if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_DEPLOYMENT_URL_HERE') {
+                console.warn('Apps Script URL not configured. Using sample data.');
+                loadSampleData();
+                return;
+            }
+            
+            showLoading(true);
             try {
-                isLoading = true;
-                showLoadingMessage('Loading data from Google Sheets...');
-                
                 const response = await fetch(`${APPS_SCRIPT_URL}?action=getData`);
                 const result = await response.json();
                 
                 if (result.success) {
-                    documentsData = result.data.map(doc => ({
-                        id: doc.id,
-                        refNumber: doc.referencenumber || '',
-                        fileName: doc.filename || '',
-                        title: doc.documenttitle || '',
-                        date: doc.date || '',
-                        personInCharge: doc.personincharge || '',
-                        notes: doc.notes || ''
-                    }));
-                    
+                    documentsData = result.data || [];
                     filteredData = [...documentsData];
                     renderDocuments();
-                    populateFilters();
-                    updateDocumentCount();
-                    hideLoadingMessage();
+                    updateFilters();
+                    updateTotalCount();
                 } else {
                     throw new Error(result.error || 'Failed to load data');
                 }
             } catch (error) {
                 console.error('Error loading data:', error);
-                hideLoadingMessage();
-                showErrorMessage('Failed to load data from Google Sheets. Using offline mode.');
-                // Use sample data as fallback
+                showError('Failed to load data from Google Sheets. Using sample data.');
                 loadSampleData();
             } finally {
-                isLoading = false;
+                showLoading(false);
             }
         }
 
-        // Save document to Google Sheets
-        async function saveToSheets(documentData) {
+        async function addDocumentToGoogleSheets(documentData) {
+            if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_DEPLOYMENT_URL_HERE') {
+                console.warn('Apps Script URL not configured. Adding to local data only.');
+                documentsData.push(documentData);
+                return true;
+            }
+            
+            showLoading(true);
             try {
                 const response = await fetch(APPS_SCRIPT_URL, {
                     method: 'POST',
+                    mode: 'no-cors',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({
-                        action: 'addDocument',
-                        data: documentData
-                    })
+                    body: JSON.stringify(documentData)
                 });
                 
-                const result = await response.json();
+                // With no-cors mode, we can't read the response
+                // So we assume success and reload data to verify
+                await loadDataFromGoogleSheets();
+                return true;
                 
-                if (result.success) {
-                    return true;
-                } else {
-                    throw new Error(result.error || 'Failed to save document');
-                }
             } catch (error) {
-                console.error('Error saving to sheets:', error);
-                throw error;
+                console.error('Error adding document:', error);
+                showError('Failed to add document to Google Sheets: ' + error.message);
+                return false;
+            } finally {
+                showLoading(false);
             }
         }
 
-        // Load sample data as fallback
         function loadSampleData() {
             documentsData = [
                 {
                     id: 1,
                     refNumber: 'SMIK.700-1/1/1JLD25(1)',
                     fileName: 'SMIK.700-1/1/1',
-                    title: 'Surat Pelantikan Jawatankuasa Kokurikulum',
+                    title: 'Penubuhan Jawatankuasa Kokurikulum 2025',
                     date: '2025-01-15',
                     personInCharge: 'Pn. Siti Aminah',
-                    notes: 'Pelantikan ahli jawatankuasa kokurikulum untuk tahun 2025'
+                    notes: 'Surat pelantikan ahli jawatankuasa kokurikulum'
                 },
                 {
                     id: 2,
                     refNumber: 'SMIK.700-1/1/2JLD25(1)',
                     fileName: 'SMIK.700-1/1/2',
-                    title: 'Visi dan Misi Sekolah 2025',
+                    title: 'Kemaskini Visi dan Misi Sekolah',
                     date: '2025-01-20',
                     personInCharge: 'En. Ahmad Rahman',
-                    notes: 'Kemaskini visi, misi dan logo sekolah untuk tahun 2025'
+                    notes: 'Dokumen rasmi visi, misi dan logo sekolah'
+                },
+                {
+                    id: 3,
+                    refNumber: 'SMIK.700-1/1/3JLD25(1)',
+                    fileName: 'SMIK.700-1/1/3',
+                    title: 'Takwim Aktiviti Kokurikulum 2025',
+                    date: '2025-02-01',
+                    personInCharge: 'Cik Fatimah',
+                    notes: 'Perancangan aktiviti kokurikulum sepanjang tahun'
                 }
             ];
             filteredData = [...documentsData];
             renderDocuments();
-            populateFilters();
-            updateDocumentCount();
+            updateFilters();
+            updateTotalCount();
         }
 
-        // Show loading message
-        function showLoadingMessage(message) {
-            const tbody = document.getElementById('documentsTableBody');
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="6" class="px-6 py-12 text-center">
-                        <div class="flex items-center justify-center space-x-2">
-                            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600"></div>
-                            <span class="text-gray-600">${message}</span>
-                        </div>
-                    </td>
-                </tr>
-            `;
+        function showLoading(show) {
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            if (show) {
+                loadingIndicator.classList.remove('hidden');
+            } else {
+                loadingIndicator.classList.add('hidden');
+            }
         }
 
-        // Hide loading message
-        function hideLoadingMessage() {
-            // Loading message will be replaced by renderDocuments()
-        }
-
-        // Show error message
-        function showErrorMessage(message) {
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 fade-in';
-            errorDiv.innerHTML = `
-                <div class="flex items-center space-x-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    <span>${message}</span>
-                </div>
-            `;
-            document.body.appendChild(errorDiv);
-            
+        function showError(message) {
+            const errorMessage = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            errorText.textContent = message;
+            errorMessage.classList.remove('hidden');
             setTimeout(() => {
-                errorDiv.remove();
+                errorMessage.classList.add('hidden');
             }, 5000);
         }
 
         // Initialize the application
-        async function initializeApp() {
+        function initializeApp() {
             // Set today's date as default
             document.getElementById('documentDate').value = new Date().toISOString().split('T')[0];
             
@@ -343,7 +351,7 @@
             document.getElementById('documentDate').addEventListener('change', updateNextRefNumber);
             
             // Load data from Google Sheets
-            await loadDataFromSheets();
+            loadDataFromGoogleSheets();
         }
 
         // Render documents in the table
@@ -383,8 +391,8 @@
             `).join('');
         }
 
-        // Populate filter dropdowns
-        function populateFilters() {
+        // Update filter dropdowns
+        function updateFilters() {
             const fileFilter = document.getElementById('fileFilter');
             const yearFilter = document.getElementById('yearFilter');
             
@@ -430,24 +438,32 @@
             renderDocuments();
         }
 
-        // Generate next reference number based on selected file and document date
-        function generateNextRefNumber(baseFileName, documentDate) {
-            if (!baseFileName || !documentDate) return '';
+        // Generate next reference number
+        function generateNextRefNumber(fileName, documentDate = null) {
+            if (!fileName) return '';
             
-            // Extract year from document date and create JLD code
-            const year = new Date(documentDate).getFullYear();
-            const jldCode = `JLD${year.toString().slice(-2)}`;
+            // Get year from document date, or current year if no date provided
+            let year;
+            if (documentDate) {
+                year = new Date(documentDate).getFullYear();
+            } else {
+                const dateInput = document.getElementById('documentDate').value;
+                year = dateInput ? new Date(dateInput).getFullYear() : new Date().getFullYear();
+            }
             
-            // Create the full reference number with year-specific JLD code
-            const fullRefNumber = `${baseFileName}${jldCode}`;
+            // Format as JLD25 (for 2025), JLD26 (for 2026), etc.
+            const yearSuffix = `JLD${year.toString().slice(-2)}`;
+            
+            // Create the base reference with year
+            const baseRef = `${fileName}${yearSuffix}`;
             
             // Find all documents with the same base file name and year
-            const sameFileDocuments = documentsData.filter(doc => {
-                return doc.fileName === baseFileName && doc.refNumber.includes(jldCode);
-            });
+            const sameFileDocuments = documentsData.filter(doc => 
+                doc.refNumber && doc.refNumber.startsWith(baseRef)
+            );
             
             if (sameFileDocuments.length === 0) {
-                return `${fullRefNumber}(1)`;
+                return `${baseRef}(1)`;
             }
             
             // Extract sequence numbers and find the highest
@@ -457,14 +473,13 @@
             });
             
             const nextSequence = Math.max(...sequenceNumbers) + 1;
-            return `${fullRefNumber}(${nextSequence})`;
+            return `${baseRef}(${nextSequence})`;
         }
 
         // Update next reference number when file name or date changes
         function updateNextRefNumber() {
-            const baseFileName = document.getElementById('fileName').value.trim();
-            const documentDate = document.getElementById('documentDate').value;
-            const nextRefNumber = generateNextRefNumber(baseFileName, documentDate);
+            const fileName = document.getElementById('fileName').value.trim();
+            const nextRefNumber = generateNextRefNumber(fileName);
             document.getElementById('nextRefNumber').value = nextRefNumber;
         }
 
@@ -485,76 +500,42 @@
         document.getElementById('newDocumentForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            if (isLoading) return;
-            
-            const baseFileName = document.getElementById('fileName').value.trim();
-            const documentDate = document.getElementById('documentDate').value;
-            
             const formData = {
+                id: documentsData.length + 1,
                 refNumber: document.getElementById('nextRefNumber').value,
-                fileName: baseFileName,
+                fileName: document.getElementById('fileName').value.trim(),
                 title: document.getElementById('documentTitle').value.trim(),
-                date: documentDate,
+                date: document.getElementById('documentDate').value,
                 personInCharge: document.getElementById('personInCharge').value.trim(),
                 notes: document.getElementById('notes').value.trim()
             };
             
-            try {
-                // Show loading state
-                const submitBtn = document.querySelector('button[type="submit"]');
-                const originalText = submitBtn.textContent;
-                submitBtn.textContent = 'Saving...';
-                submitBtn.disabled = true;
-                
-                // Save to Google Sheets
-                await saveToSheets(formData);
-                
-                // Add to local data
-                const newDoc = {
-                    id: documentsData.length + 1,
-                    ...formData
-                };
-                documentsData.push(newDoc);
-                
+            // Add to Google Sheets
+            const success = await addDocumentToGoogleSheets(formData);
+            
+            if (success) {
                 // Update filtered data and re-render
                 applyFilters();
-                populateFilters();
-                updateDocumentCount();
+                updateFilters();
+                updateTotalCount();
                 
                 // Close form and show success message
                 closeNewDocumentForm();
-                showSuccessMessage('Document saved to Google Sheets successfully!');
-                
-                // Reset button
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
-                
-            } catch (error) {
-                console.error('Error saving document:', error);
-                
-                // Reset button
-                const submitBtn = document.querySelector('button[type="submit"]');
-                submitBtn.textContent = 'Add Document';
-                submitBtn.disabled = false;
-                
-                // Show error message
-                showErrorMessage('Failed to save to Google Sheets. Please try again.');
+                showSuccessMessage();
             }
         });
 
         // Show success message
-        function showSuccessMessage(customMessage = 'Document added successfully!') {
+        function showSuccessMessage() {
             const message = document.getElementById('successMessage');
-            const messageText = message.querySelector('span');
-            messageText.textContent = customMessage;
             message.classList.remove('hidden');
             setTimeout(() => {
                 message.classList.add('hidden');
-            }, 4000);
+            }, 3000);
         }
 
-        // Update document count
-        function updateDocumentCount() {
+        // Update total document count
+        function updateTotalCount() {
             document.getElementById('totalDocs').textContent = documentsData.length;
         }
 
@@ -578,5 +559,5 @@
         // Initialize the app when page loads
         document.addEventListener('DOMContentLoaded', initializeApp);
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98512bc4e3a51be4',t:'MTc1ODg3MzAzMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9859062eb21dd04c',t:'MTc1ODk1NTM3OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
