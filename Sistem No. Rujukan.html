@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Document Reference System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            box-sizing: border-box;
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .modal-backdrop {
+            backdrop-filter: blur(4px);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">Document Reference System</h1>
+                        <p class="text-sm text-gray-600">Manage school documents efficiently</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="text-sm text-gray-600">
+                        <span class="font-medium" id="totalDocs">0</span> documents
+                    </div>
+                    <button onclick="openNewDocumentForm()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center space-x-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        </svg>
+                        <span>New Document</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Search and Filter Section -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Search & Filter Documents</h2>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Search</label>
+                    <input type="text" id="searchInput" placeholder="Search documents..." class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">File Name</label>
+                    <select id="fileFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">All Files</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Year</label>
+                    <select id="yearFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">All Years</option>
+                    </select>
+                </div>
+                <div class="flex items-end">
+                    <button onclick="clearFilters()" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium transition-colors duration-200">
+                        Clear Filters
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Documents Table -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">Document Records</h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reference Number</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">File Name</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Document Title</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Person in Charge</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody id="documentsTableBody" class="bg-white divide-y divide-gray-200">
+                        <!-- Documents will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+            <div id="noResults" class="hidden px-6 py-12 text-center">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">No documents found</h3>
+                <p class="mt-1 text-sm text-gray-500">Try adjusting your search criteria or add a new document.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- New Document Modal -->
+    <div id="newDocumentModal" class="hidden fixed inset-0 bg-black bg-opacity-50 modal-backdrop z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                <h2 class="text-xl font-semibold text-gray-900">Add New Document</h2>
+                <button onclick="closeNewDocumentForm()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <form id="newDocumentForm" class="p-6 space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">File Name *</label>
+                        <select id="fileName" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="">Select file reference...</option>
+                            <option value="SMIK.700-1/1/1">SMIK.700-1/1/1 - Jawatankuasa Kokurikulum</option>
+                            <option value="SMIK.700-1/1/2">SMIK.700-1/1/2 - Visi, Misi & Logo</option>
+                            <option value="SMIK.700-1/1/3">SMIK.700-1/1/3 - Perancangan/Takwim Tahunan Kokurikulum</option>
+                            <option value="SMIK.700-1/1/4">SMIK.700-1/1/4 - Kewangan & Perbelanjaan Kokurikulum</option>
+                            <option value="SMIK.700-1/1/5">SMIK.700-1/1/5 - Pekeliling/Surat Menyurat</option>
+                        </select>
+                        <p class="mt-1 text-xs text-gray-500">Choose from existing file references</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Next Reference Number</label>
+                        <input type="text" id="nextRefNumber" readonly class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-600">
+                        <p class="mt-1 text-xs text-gray-500">Auto-generated based on last entry</p>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Document Title *</label>
+                    <input type="text" id="documentTitle" required placeholder="Enter document title" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Date *</label>
+                        <input type="date" id="documentDate" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Person in Charge *</label>
+                        <input type="text" id="personInCharge" required placeholder="Enter name" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+                    <textarea id="notes" rows="3" placeholder="Additional notes (optional)" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                </div>
+                
+                <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+                    <button type="button" onclick="closeNewDocumentForm()" class="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-colors duration-200">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors duration-200">
+                        Add Document
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Success Message -->
+    <div id="successMessage" class="hidden fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 fade-in">
+        <div class="flex items-center space-x-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <span>Document added successfully!</span>
+        </div>
+    </div>
+
+    <script>
+        // Google Apps Script URL
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwjrjmI6ZLfH3cylCiXqv3Z2rAG5-uaTqURSCqvjDtIEuRcuC7vomXZ7PEqp-vx4G_lcg/exec';
+        
+        let documentsData = [];
+        let filteredData = [];
+        let isLoading = false;
+
+        // Load data from Google Sheets
+        async function loadDataFromSheets() {
+            try {
+                isLoading = true;
+                showLoadingMessage('Loading data from Google Sheets...');
+                
+                const response = await fetch(`${APPS_SCRIPT_URL}?action=getData`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    documentsData = result.data.map(doc => ({
+                        id: doc.id,
+                        refNumber: doc.referencenumber || '',
+                        fileName: doc.filename || '',
+                        title: doc.documenttitle || '',
+                        date: doc.date || '',
+                        personInCharge: doc.personincharge || '',
+                        notes: doc.notes || ''
+                    }));
+                    
+                    filteredData = [...documentsData];
+                    renderDocuments();
+                    populateFilters();
+                    updateDocumentCount();
+                    hideLoadingMessage();
+                } else {
+                    throw new Error(result.error || 'Failed to load data');
+                }
+            } catch (error) {
+                console.error('Error loading data:', error);
+                hideLoadingMessage();
+                showErrorMessage('Failed to load data from Google Sheets. Using offline mode.');
+                // Use sample data as fallback
+                loadSampleData();
+            } finally {
+                isLoading = false;
+            }
+        }
+
+        // Save document to Google Sheets
+        async function saveToSheets(documentData) {
+            try {
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'addDocument',
+                        data: documentData
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    return true;
+                } else {
+                    throw new Error(result.error || 'Failed to save document');
+                }
+            } catch (error) {
+                console.error('Error saving to sheets:', error);
+                throw error;
+            }
+        }
+
+        // Load sample data as fallback
+        function loadSampleData() {
+            documentsData = [
+                {
+                    id: 1,
+                    refNumber: 'SMIK.700-1/1/1JLD25(1)',
+                    fileName: 'SMIK.700-1/1/1',
+                    title: 'Surat Pelantikan Jawatankuasa Kokurikulum',
+                    date: '2025-01-15',
+                    personInCharge: 'Pn. Siti Aminah',
+                    notes: 'Pelantikan ahli jawatankuasa kokurikulum untuk tahun 2025'
+                },
+                {
+                    id: 2,
+                    refNumber: 'SMIK.700-1/1/2JLD25(1)',
+                    fileName: 'SMIK.700-1/1/2',
+                    title: 'Visi dan Misi Sekolah 2025',
+                    date: '2025-01-20',
+                    personInCharge: 'En. Ahmad Rahman',
+                    notes: 'Kemaskini visi, misi dan logo sekolah untuk tahun 2025'
+                }
+            ];
+            filteredData = [...documentsData];
+            renderDocuments();
+            populateFilters();
+            updateDocumentCount();
+        }
+
+        // Show loading message
+        function showLoadingMessage(message) {
+            const tbody = document.getElementById('documentsTableBody');
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="px-6 py-12 text-center">
+                        <div class="flex items-center justify-center space-x-2">
+                            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600"></div>
+                            <span class="text-gray-600">${message}</span>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }
+
+        // Hide loading message
+        function hideLoadingMessage() {
+            // Loading message will be replaced by renderDocuments()
+        }
+
+        // Show error message
+        function showErrorMessage(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 fade-in';
+            errorDiv.innerHTML = `
+                <div class="flex items-center space-x-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span>${message}</span>
+                </div>
+            `;
+            document.body.appendChild(errorDiv);
+            
+            setTimeout(() => {
+                errorDiv.remove();
+            }, 5000);
+        }
+
+        // Initialize the application
+        async function initializeApp() {
+            // Set today's date as default
+            document.getElementById('documentDate').value = new Date().toISOString().split('T')[0];
+            
+            // Add event listeners for search and filters
+            document.getElementById('searchInput').addEventListener('input', applyFilters);
+            document.getElementById('fileFilter').addEventListener('change', applyFilters);
+            document.getElementById('yearFilter').addEventListener('change', applyFilters);
+            document.getElementById('fileName').addEventListener('change', updateNextRefNumber);
+            document.getElementById('documentDate').addEventListener('change', updateNextRefNumber);
+            
+            // Load data from Google Sheets
+            await loadDataFromSheets();
+        }
+
+        // Render documents in the table
+        function renderDocuments() {
+            const tbody = document.getElementById('documentsTableBody');
+            const noResults = document.getElementById('noResults');
+            
+            if (filteredData.length === 0) {
+                tbody.innerHTML = '';
+                noResults.classList.remove('hidden');
+                return;
+            }
+            
+            noResults.classList.add('hidden');
+            
+            tbody.innerHTML = filteredData.map(doc => `
+                <tr class="hover:bg-gray-50 transition-colors duration-150">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium text-gray-900">${doc.refNumber}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900">${doc.fileName}</div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="text-sm text-gray-900">${doc.title}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900">${formatDate(doc.date)}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900">${doc.personInCharge}</div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="text-sm text-gray-500">${doc.notes || '-'}</div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Populate filter dropdowns
+        function populateFilters() {
+            const fileFilter = document.getElementById('fileFilter');
+            const yearFilter = document.getElementById('yearFilter');
+            
+            // Get unique file names
+            const uniqueFiles = [...new Set(documentsData.map(doc => doc.fileName))];
+            fileFilter.innerHTML = '<option value="">All Files</option>' + 
+                uniqueFiles.map(file => `<option value="${file}">${file}</option>`).join('');
+            
+            // Get unique years
+            const uniqueYears = [...new Set(documentsData.map(doc => new Date(doc.date).getFullYear()))];
+            yearFilter.innerHTML = '<option value="">All Years</option>' + 
+                uniqueYears.sort((a, b) => b - a).map(year => `<option value="${year}">${year}</option>`).join('');
+        }
+
+        // Apply search and filters
+        function applyFilters() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const fileFilter = document.getElementById('fileFilter').value;
+            const yearFilter = document.getElementById('yearFilter').value;
+            
+            filteredData = documentsData.filter(doc => {
+                const matchesSearch = !searchTerm || 
+                    doc.refNumber.toLowerCase().includes(searchTerm) ||
+                    doc.title.toLowerCase().includes(searchTerm) ||
+                    doc.personInCharge.toLowerCase().includes(searchTerm) ||
+                    (doc.notes && doc.notes.toLowerCase().includes(searchTerm));
+                
+                const matchesFile = !fileFilter || doc.fileName === fileFilter;
+                const matchesYear = !yearFilter || new Date(doc.date).getFullYear().toString() === yearFilter;
+                
+                return matchesSearch && matchesFile && matchesYear;
+            });
+            
+            renderDocuments();
+        }
+
+        // Clear all filters
+        function clearFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('fileFilter').value = '';
+            document.getElementById('yearFilter').value = '';
+            filteredData = [...documentsData];
+            renderDocuments();
+        }
+
+        // Generate next reference number based on selected file and document date
+        function generateNextRefNumber(baseFileName, documentDate) {
+            if (!baseFileName || !documentDate) return '';
+            
+            // Extract year from document date and create JLD code
+            const year = new Date(documentDate).getFullYear();
+            const jldCode = `JLD${year.toString().slice(-2)}`;
+            
+            // Create the full reference number with year-specific JLD code
+            const fullRefNumber = `${baseFileName}${jldCode}`;
+            
+            // Find all documents with the same base file name and year
+            const sameFileDocuments = documentsData.filter(doc => {
+                return doc.fileName === baseFileName && doc.refNumber.includes(jldCode);
+            });
+            
+            if (sameFileDocuments.length === 0) {
+                return `${fullRefNumber}(1)`;
+            }
+            
+            // Extract sequence numbers and find the highest
+            const sequenceNumbers = sameFileDocuments.map(doc => {
+                const match = doc.refNumber.match(/\((\d+)\)$/);
+                return match ? parseInt(match[1]) : 0;
+            });
+            
+            const nextSequence = Math.max(...sequenceNumbers) + 1;
+            return `${fullRefNumber}(${nextSequence})`;
+        }
+
+        // Update next reference number when file name or date changes
+        function updateNextRefNumber() {
+            const baseFileName = document.getElementById('fileName').value.trim();
+            const documentDate = document.getElementById('documentDate').value;
+            const nextRefNumber = generateNextRefNumber(baseFileName, documentDate);
+            document.getElementById('nextRefNumber').value = nextRefNumber;
+        }
+
+        // Open new document form
+        function openNewDocumentForm() {
+            document.getElementById('newDocumentModal').classList.remove('hidden');
+            document.getElementById('fileName').focus();
+        }
+
+        // Close new document form
+        function closeNewDocumentForm() {
+            document.getElementById('newDocumentModal').classList.add('hidden');
+            document.getElementById('newDocumentForm').reset();
+            document.getElementById('nextRefNumber').value = '';
+        }
+
+        // Handle form submission
+        document.getElementById('newDocumentForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (isLoading) return;
+            
+            const baseFileName = document.getElementById('fileName').value.trim();
+            const documentDate = document.getElementById('documentDate').value;
+            
+            const formData = {
+                refNumber: document.getElementById('nextRefNumber').value,
+                fileName: baseFileName,
+                title: document.getElementById('documentTitle').value.trim(),
+                date: documentDate,
+                personInCharge: document.getElementById('personInCharge').value.trim(),
+                notes: document.getElementById('notes').value.trim()
+            };
+            
+            try {
+                // Show loading state
+                const submitBtn = document.querySelector('button[type="submit"]');
+                const originalText = submitBtn.textContent;
+                submitBtn.textContent = 'Saving...';
+                submitBtn.disabled = true;
+                
+                // Save to Google Sheets
+                await saveToSheets(formData);
+                
+                // Add to local data
+                const newDoc = {
+                    id: documentsData.length + 1,
+                    ...formData
+                };
+                documentsData.push(newDoc);
+                
+                // Update filtered data and re-render
+                applyFilters();
+                populateFilters();
+                updateDocumentCount();
+                
+                // Close form and show success message
+                closeNewDocumentForm();
+                showSuccessMessage('Document saved to Google Sheets successfully!');
+                
+                // Reset button
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+                
+            } catch (error) {
+                console.error('Error saving document:', error);
+                
+                // Reset button
+                const submitBtn = document.querySelector('button[type="submit"]');
+                submitBtn.textContent = 'Add Document';
+                submitBtn.disabled = false;
+                
+                // Show error message
+                showErrorMessage('Failed to save to Google Sheets. Please try again.');
+            }
+        });
+
+        // Show success message
+        function showSuccessMessage(customMessage = 'Document added successfully!') {
+            const message = document.getElementById('successMessage');
+            const messageText = message.querySelector('span');
+            messageText.textContent = customMessage;
+            message.classList.remove('hidden');
+            setTimeout(() => {
+                message.classList.add('hidden');
+            }, 4000);
+        }
+
+        // Update document count
+        function updateDocumentCount() {
+            document.getElementById('totalDocs').textContent = documentsData.length;
+        }
+
+        // Format date for display
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('newDocumentModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeNewDocumentForm();
+            }
+        });
+
+        // Initialize the app when page loads
+        document.addEventListener('DOMContentLoaded', initializeApp);
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98512bc4e3a51be4',t:'MTc1ODg3MzAzMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
