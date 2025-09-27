@@ -283,42 +283,6 @@
             }
         }
 
-        function loadSampleData() {
-            documentsData = [
-                {
-                    id: 1,
-                    refNumber: 'SMIK.700-1/1/1JLD25(1)',
-                    fileName: 'SMIK.700-1/1/1',
-                    title: 'Penubuhan Jawatankuasa Kokurikulum 2025',
-                    date: '2025-01-15',
-                    personInCharge: 'Pn. Siti Aminah',
-                    notes: 'Surat pelantikan ahli jawatankuasa kokurikulum'
-                },
-                {
-                    id: 2,
-                    refNumber: 'SMIK.700-1/1/2JLD25(1)',
-                    fileName: 'SMIK.700-1/1/2',
-                    title: 'Kemaskini Visi dan Misi Sekolah',
-                    date: '2025-01-20',
-                    personInCharge: 'En. Ahmad Rahman',
-                    notes: 'Dokumen rasmi visi, misi dan logo sekolah'
-                },
-                {
-                    id: 3,
-                    refNumber: 'SMIK.700-1/1/3JLD25(1)',
-                    fileName: 'SMIK.700-1/1/3',
-                    title: 'Takwim Aktiviti Kokurikulum 2025',
-                    date: '2025-02-01',
-                    personInCharge: 'Cik Fatimah',
-                    notes: 'Perancangan aktiviti kokurikulum sepanjang tahun'
-                }
-            ];
-            filteredData = [...documentsData];
-            renderDocuments();
-            updateFilters();
-            updateTotalCount();
-        }
-
         function showLoading(show) {
             const loadingIndicator = document.getElementById('loadingIndicator');
             if (show) {
