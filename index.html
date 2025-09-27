@@ -57,15 +57,27 @@
         <!-- Search and Filter Section -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
             <h2 class="text-lg font-semibold text-gray-900 mb-4">Search & Filter Documents</h2>
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div>
+            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4">
+                <div class="md:col-span-2 lg:col-span-2 xl:col-span-2">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Search</label>
                     <input type="text" id="searchInput" placeholder="Search documents..." class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">File Name</label>
-                    <select id="fileFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                        <option value="">All Files</option>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Division</label>
+                    <select id="divisionFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">All Divisions</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">File Code</label>
+                    <select id="fileCodeFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">All File Codes</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Sub-File</label>
+                    <select id="subFileFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">All Sub-Files</option>
                     </select>
                 </div>
                 <div>
@@ -555,7 +567,9 @@
             
             // Add event listeners for search and filters
             document.getElementById('searchInput').addEventListener('input', applyFilters);
-            document.getElementById('fileFilter').addEventListener('change', applyFilters);
+            document.getElementById('divisionFilter').addEventListener('change', applyFilters);
+            document.getElementById('fileCodeFilter').addEventListener('change', applyFilters);
+            document.getElementById('subFileFilter').addEventListener('change', applyFilters);
             document.getElementById('yearFilter').addEventListener('change', applyFilters);
             
             // Add event listeners for cascade dropdowns
@@ -623,13 +637,25 @@
 
         // Update filter dropdowns
         function updateFilters() {
-            const fileFilter = document.getElementById('fileFilter');
+            const divisionFilter = document.getElementById('divisionFilter');
+            const fileCodeFilter = document.getElementById('fileCodeFilter');
+            const subFileFilter = document.getElementById('subFileFilter');
             const yearFilter = document.getElementById('yearFilter');
             
-            // Get unique file names
-            const uniqueFiles = [...new Set(documentsData.map(doc => doc.fileName))];
-            fileFilter.innerHTML = '<option value="">All Files</option>' + 
-                uniqueFiles.map(file => `<option value="${file}">${file}</option>`).join('');
+            // Get unique divisions
+            const uniqueDivisions = [...new Set(documentsData.map(doc => doc.divisionName).filter(Boolean))];
+            divisionFilter.innerHTML = '<option value="">All Divisions</option>' + 
+                uniqueDivisions.map(division => `<option value="${division}">${division}</option>`).join('');
+            
+            // Get unique file codes
+            const uniqueFileCodes = [...new Set(documentsData.map(doc => doc.fileCodeName).filter(Boolean))];
+            fileCodeFilter.innerHTML = '<option value="">All File Codes</option>' + 
+                uniqueFileCodes.map(fileCode => `<option value="${fileCode}">${fileCode}</option>`).join('');
+            
+            // Get unique sub-files
+            const uniqueSubFiles = [...new Set(documentsData.map(doc => doc.subFileCodeName).filter(Boolean))];
+            subFileFilter.innerHTML = '<option value="">All Sub-Files</option>' + 
+                uniqueSubFiles.map(subFile => `<option value="${subFile}">${subFile}</option>`).join('');
             
             // Get unique years
             const uniqueYears = [...new Set(documentsData.map(doc => new Date(doc.date).getFullYear()))];
@@ -640,7 +666,9 @@
         // Apply search and filters
         function applyFilters() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const fileFilter = document.getElementById('fileFilter').value;
+            const divisionFilter = document.getElementById('divisionFilter').value;
+            const fileCodeFilter = document.getElementById('fileCodeFilter').value;
+            const subFileFilter = document.getElementById('subFileFilter').value;
             const yearFilter = document.getElementById('yearFilter').value;
             
             filteredData = documentsData.filter(doc => {
@@ -650,10 +678,12 @@
                     doc.personInCharge.toLowerCase().includes(searchTerm) ||
                     (doc.notes && doc.notes.toLowerCase().includes(searchTerm));
                 
-                const matchesFile = !fileFilter || doc.fileName === fileFilter;
+                const matchesDivision = !divisionFilter || doc.divisionName === divisionFilter;
+                const matchesFileCode = !fileCodeFilter || doc.fileCodeName === fileCodeFilter;
+                const matchesSubFile = !subFileFilter || doc.subFileCodeName === subFileFilter;
                 const matchesYear = !yearFilter || new Date(doc.date).getFullYear().toString() === yearFilter;
                 
-                return matchesSearch && matchesFile && matchesYear;
+                return matchesSearch && matchesDivision && matchesFileCode && matchesSubFile && matchesYear;
             });
             
             renderDocuments();
@@ -662,7 +692,9 @@
         // Clear all filters
         function clearFilters() {
             document.getElementById('searchInput').value = '';
-            document.getElementById('fileFilter').value = '';
+            document.getElementById('divisionFilter').value = '';
+            document.getElementById('fileCodeFilter').value = '';
+            document.getElementById('subFileFilter').value = '';
             document.getElementById('yearFilter').value = '';
             filteredData = [...documentsData];
             renderDocuments();
@@ -902,5 +934,5 @@
         // Initialize the app when page loads
         document.addEventListener('DOMContentLoaded', initializeApp);
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9859458ae346abd7',t:'MTc1ODk1Nzk3NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9859a4a3c3bdb4dc',t:'MTc1ODk2MTg2OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
